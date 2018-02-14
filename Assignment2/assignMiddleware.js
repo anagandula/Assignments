@@ -5,9 +5,4 @@ module.exports = function(router){
         console.log("All blogs are seen Today at: "+today);
         next();
     });
-    
-    router.get('*',function(req,res,next){
-        res.render("Please check the path");
-        next();
-    });
 }
