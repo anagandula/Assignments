@@ -5,8 +5,6 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var router = express.Router();
 require('./assignMiddleware.js')(router);
-app.use('/blogs',router);
-
 app.use(bodyParser.json({limit:'10mb',extended: true}));
 app.use(bodyParser.urlencoded({limit:'10mb',extended: true}));
 
@@ -78,14 +76,15 @@ app.post('/blog/:id/delete',function(req,res,next){
 app.put('/blog/:id/edit',function(req,res){
     
     update = req.body;
-    console.log(req.authorInfo.fullName+" made this request");
     blogModel.findOneAndUpdate({'_id':req.params.id},update,function(err,result){
         if(err){
             console.log(err);
-            res.send(err);
+            err = new Error("Searched Blog ID doesn't exist");
+            next(err);
         }
         else{
-            console.log(result);
+            var modi = new Date();
+            result.lastModified = modi; 
             res.send(result);
         }
     });
@@ -94,7 +93,7 @@ app.put('/blog/:id/edit',function(req,res){
 /////////////////////////////////////////////////////////////////
 //reading all the existing blogs
 
-app.get('/blogs',function(req,res){
+app.get('/blogs',router,function(req,res){
     blogModel.find(function(err,result){
         if(err){
             res.send(err);
@@ -126,16 +125,17 @@ app.post('/blog/create',function(req,res,next){
     var tags = (req.body.tags!=undefined && req.body.tags!=null)?req.body.tags.split(','):''
     newBlog.tags = tags;
     
-    var authorInfo = {fullName: req.body.authorFullName,email: req.body.authorEmail};
+    var authorInfo = {fullName: req.body.fullName,email: req.body.email};
     newBlog.authorInfo = authorInfo;
     
     newBlog.save(function(err,result){
         if(err){
             console.log(err);
-            if(req.body.title == null){
-                err = new Error("Blog title is required field. Please name your Blog!!");
-                next(err);
-            }
+            res.send(err);
+        }
+        else if(req.body.title == null){
+            console.log(result);    
+            res.send("Blog title is required field. Please name your Blog!!");
         }
         else{
             console.log(result);
