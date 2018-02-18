@@ -32,12 +32,12 @@ app.get('/blog/:id/read',function(req,res,next){
         blogModel.findOne({'_id':req.params.id}, function(err,result){
         if(err){
             console.log(err);
-            err = new Error("Searched Blog ID doesn't exist");
+            err = new Error("Searched Blog ID doesn't exist"); //if searched id doesn't exist at all
             next(err);
         }
         else{
             if(result == null){
-                err = new Error("Searched Blog ID doesn't exist");
+                err = new Error("Searched Blog ID doesn't exist"); //searched for deleted ID
                 next(err);
             }
             else{
@@ -57,15 +57,15 @@ app.post('/blog/:id/delete',function(req,res,next){
     blogModel.remove({'_id':req.params.id},function(err,result){
         if(err){
             console.log(err);
-            err = new Error("The Blog you want to delete, does not exists at all. Kindly recheck it");
+            err = new Error("The Blog you want to delete, does not exists at all. Kindly recheck it"); // Searched with the ID which doesn't                                                                                                // exist at all
             next(err);
         }
         else if(result.n>0){
             console.log(result);
-            res.send("Deleted Successfully");
+            res.send("Deleted Successfully"); //if deleted successfully
         }
         else{
-            res.send("Nothing to delete");
+            res.send("Nothing to delete"); //searched with already deleted id
         }
     });
 });
@@ -79,12 +79,12 @@ app.put('/blog/:id/edit',function(req,res){
     blogModel.findOneAndUpdate({'_id':req.params.id},update,function(err,result){
         if(err){
             console.log(err);
-            err = new Error("Searched Blog ID doesn't exist");
+            err = new Error("Searched Blog ID doesn't exist"); //if searched with the ID which doesn't exist at all
             next(err);
         }
         else{
             var modi = new Date();
-            result.lastModified = modi; 
+            result.lastModified = modi; //updates with the last modified date
             res.send(result);
         }
     });
@@ -135,7 +135,7 @@ app.post('/blog/create',function(req,res,next){
         }
         else if(req.body.title == null){
             console.log(result);    
-            res.send("Blog title is required field. Please name your Blog!!");
+            res.send("Blog title is required field. Please name your Blog!!"); //tells about the mandatory field
         }
         else{
             console.log(result);
@@ -147,7 +147,7 @@ app.post('/blog/create',function(req,res,next){
 /////////////////////////////////////////////////////////////////
 
 app.get('*',function(req,res,next){
-    var err = new Error("Please check the path correctly!!");
+    var err = new Error("Please check the path correctly!!"); //tells about the path specified
     next(err);
 });
 
