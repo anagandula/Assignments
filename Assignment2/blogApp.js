@@ -131,7 +131,7 @@ app.post('/blog/create',function(req,res,next){
     newBlog.save(function(err,result){
         if(err){
             console.log(err);
-            res.send(err);
+            res.send("Blog with same title already exists. Please choose some other title!!");
         }
         else if(req.body.title == null){
             console.log(result);    
