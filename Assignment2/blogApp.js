@@ -4,19 +4,24 @@ var app = express();
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var router = express.Router();
-require('./assignMiddleware.js')(router);
+require('./assignMiddleware.js')(router); //importing the file assignMiddleware.js
 app.use(bodyParser.json({limit:'10mb',extended: true}));
 app.use(bodyParser.urlencoded({limit:'10mb',extended: true}));
+
+app.use(function(err,req,res,next){
+    res.status(404).send(err.message);
+    next();
+});
 
 var dbPath = 'mongodb://localhost/myBlogApplication';
 
 mongoose.connect(dbPath);
 
 mongoose.connection.once('open',function(){
-    console.log('Connection has een established with MongoDB');
+    console.log('Connection has been established with MongoDB');
 });
 
-var Blog = require('./blogModel.js');
+var Blog = require('./blogModel.js'); //importing the file blogModel.js
 
 var blogModel = mongoose.model('Blog');
 
@@ -44,7 +49,6 @@ app.get('/blog/:id/read',function(req,res,next){
                 console.log(result);
                 res.send(result);
             }
-            
         }
     });
 });
@@ -73,7 +77,7 @@ app.post('/blog/:id/delete',function(req,res,next){
 /////////////////////////////////////////////////////////////////
 //update or edit any details in blog
 
-app.put('/blog/:id/edit',function(req,res){
+app.put('/blog/:id/edit',function(req,res,next){
     
     update = req.body;
     blogModel.findOneAndUpdate({'_id':req.params.id},update,function(err,result){
@@ -117,6 +121,9 @@ app.post('/blog/create',function(req,res,next){
         
     });
     
+    //var title = req.body.title;
+    //var newBlogs = [];
+    
     var today = new Date();
     newBlog.created = today;
     
@@ -131,11 +138,14 @@ app.post('/blog/create',function(req,res,next){
     newBlog.save(function(err,result){
         if(err){
             console.log(err);
-            res.send("Blog with same title already exists. Please choose some other title!!");
-        }
-        else if(req.body.title == null){
-            console.log(result);    
-            res.send("Blog title is required field. Please name your Blog!!"); //tells about the mandatory field
+            if(err.errors.title.message === "Path `title` is required."){
+                var err1 = new Error ("Please Name your Blog..it is required!!");
+                next(err1);
+            }
+            else{
+                res.send(err);
+            }
+            
         }
         else{
             console.log(result);
@@ -143,7 +153,6 @@ app.post('/blog/create',function(req,res,next){
         }
     });
 });
-
 /////////////////////////////////////////////////////////////////
 
 app.get('*',function(req,res,next){
@@ -151,9 +160,18 @@ app.get('*',function(req,res,next){
     next(err);
 });
 
+app.post('*',function(req,res,next){
+    var err = new Error("Please check the path correctly!!"); //tells about the path specified
+    next(err);
+});
+
+app.put('*',function(req,res,next){
+    var err = new Error("Please check the path correctly!!"); //tells about the path specified
+    next(err);
+});
+
 app.use(function(err,req,res,next){
     res.status(404).send(err.message);
-    next();
 });
 
 app.listen(3000,function(){

@@ -1,3 +1,6 @@
+var express = require('express');
+var app = express();
+
 module.exports = function(router){
     
     router.use(function(req,res,next){
@@ -7,5 +10,3 @@ module.exports = function(router){
     });
     
 }
-
-
